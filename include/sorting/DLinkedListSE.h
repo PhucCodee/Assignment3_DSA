@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-/* 
+/*
  * File:   DLinkedListSE.h
  * Author: LTSACH
  *
@@ -16,36 +16,120 @@
 #include "list/DLinkedList.h"
 #include "sorting/ISort.h"
 
-template<class T>
-class DLinkedListSE: public DLinkedList<T>{
+template <class T>
+class DLinkedListSE : public DLinkedList<T>
+{
 public:
-    
     DLinkedListSE(
-            void (*removeData)(DLinkedList<T>*)=0, 
-            bool (*itemEQ)(T&, T&)=0 ) : 
-            DLinkedList<T>(removeData, itemEQ){
-        
-    };
-    
-    DLinkedListSE(const DLinkedList<T>& list){
+        void (*removeData)(DLinkedList<T> *) = 0,
+        bool (*itemEQ)(T &, T &) = 0) : DLinkedList<T>(removeData, itemEQ) {
+
+                                        };
+
+    DLinkedListSE(const DLinkedList<T> &list)
+    {
         this->copyFrom(list);
     }
-    
-    void sort(int (*comparator)(T&,T&)=0){
-        //TODO: implement this function
-        //     - You should implement the merge sort algorithm
-    };
-    
+
+    void sort(int (*comparator)(T &, T &) = 0)
+    {
+        this->tail->prev->next = NULL;
+        this->tail->prev = NULL;
+
+        typename DLinkedList<T>::Node *first = this->head->next;
+        first->prev = NULL;
+        mergeSort(first, comparator);
+
+        typename DLinkedList<T>::Node *last = this->head;
+        while (last->next != NULL)
+            last = last->next;
+
+        last->next = this->tail;
+        this->tail->prev = last;
+
+        this->head->next = first;
+        this->head->next->prev = this->head;
+    }
+
 protected:
-    static int compare(T& lhs, T& rhs, int (*comparator)(T&,T&)=0){
-        if(comparator != 0) return comparator(lhs, rhs);
-        else{
-            if(lhs < rhs) return -1;
-            else if(lhs > rhs) return +1;
-            else return 0;
+    static int compare(T &lhs, T &rhs, int (*comparator)(T &, T &) = 0)
+    {
+        if (comparator != 0)
+            return comparator(lhs, rhs);
+        else
+        {
+            if (lhs < rhs)
+                return -1;
+            else if (lhs > rhs)
+                return +1;
+            else
+                return 0;
         }
+    }
+
+    void mergeSort(typename DLinkedList<T>::Node *&head, int (*comparator)(T &, T &) = 0)
+    {
+        if (head != NULL && head->next != NULL)
+        {
+            typename DLinkedList<T>::Node *second;
+            devide(head, second);
+            mergeSort(head, comparator);
+            mergeSort(second, comparator);
+            merge(head, second, comparator);
+        }
+    }
+
+    void devide(typename DLinkedList<T>::Node *&first, typename DLinkedList<T>::Node *&second)
+    {
+        typename DLinkedList<T>::Node *midpt = first;
+        typename DLinkedList<T>::Node *endpt = first->next;
+        while (endpt->next != NULL && endpt->next->next != NULL)
+        {
+            midpt = midpt->next;
+            endpt = endpt->next->next;
+        }
+        second = midpt->next;
+        midpt->next = NULL;
+        second->prev = NULL;
+    }
+
+    void merge(typename DLinkedList<T>::Node *&first, typename DLinkedList<T>::Node *&second, int (*comparator)(T &, T &) = 0)
+    {
+        typename DLinkedList<T>::Node *result = new typename DLinkedList<T>::Node::Node();
+        typename DLinkedList<T>::Node *ptr = result;
+        while (first != NULL && second != NULL)
+        {
+            if (compare(first->data, second->data, comparator) == -1)
+            {
+                ptr->next = first;
+                ptr->next->prev = ptr;
+                first = first->next;
+                ptr = ptr->next;
+            }
+            else
+            {
+                ptr->next = second;
+                ptr->next->prev = ptr;
+                second = second->next;
+                ptr = ptr->next;
+            }
+        }
+        if (!first)
+        {
+            ptr->next = second;
+            ptr->next->prev = ptr;
+        }
+        else
+        {
+            ptr->next = first;
+            ptr->next->prev = ptr;
+        }
+
+        first = result->next;
+        first->prev = NULL;
+        result->next = NULL;
+        delete result;
     }
 };
 
 #endif /* DLINKEDLISTSE_H */
-

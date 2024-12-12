@@ -15,7 +15,7 @@
 #define UGRAPHMODEL_H
 
 #include "graph/AbstractGraph.h"
-#include "stacknqueue/PriorityQueue.h"
+// #include "stacknqueue/PriorityQueue.h"
 
 //////////////////////////////////////////////////////////////////////
 ///////////// UGraphModel: Undirected Graph Model ////////////////////
@@ -38,21 +38,63 @@ public:
     void connect(T from, T to, float weight = 0)
     {
         // TODO
+        auto fromVertex = this->getVertexNode(from);
+        auto toVertex = this->getVertexNode(to);
+        if (!fromVertex)
+            throw VertexNotFoundException(this->vertex2Str(*fromVertex));
+        if (!toVertex)
+            throw VertexNotFoundException(this->vertex2Str(*toVertex));
+
+        fromVertex->connect(toVertex, weight);
+        if (from != to)
+            toVertex->connect(fromVertex, weight);
     }
+
     void disconnect(T from, T to)
     {
         // TODO
+        auto fromVertex = this->getVertexNode(from);
+        auto toVertex = this->getVertexNode(to);
+        if (!fromVertex)
+            throw VertexNotFoundException(this->vertex2Str(*fromVertex));
+        if (!toVertex)
+            throw VertexNotFoundException(this->vertex2Str(*toVertex));
+
+        fromVertex->removeTo(toVertex);
+        if (from != to)
+            toVertex->removeTo(fromVertex);
     }
+
     void remove(T vertex)
     {
         // TODO
+        auto deleteVertex = this->getVertexNode(vertex);
+        if (!deleteVertex)
+            throw VertexNotFoundException(this->vertex2Str(*deleteVertex));
+
+        auto inwardEdges = this->getInwardEdges(vertex);
+        for (auto it = inwardEdges.begin(); it != inwardEdges.end(); ++it)
+        {
+            auto node = this->getVertexNode(*it);
+            node->removeTo(deleteVertex);
+            deleteVertex->removeTo(node);
+        }
+
+        this->nodeList.removeItem(deleteVertex);
     }
+
     static UGraphModel<T> *create(
         T *vertices, int nvertices, Edge<T> *edges, int nedges,
         bool (*vertexEQ)(T &, T &),
         string (*vertex2str)(T &))
     {
         // TODO
+        auto newModel = new UGraphModel<T>(vertexEQ, vertex2str);
+        for (int i = 0; i < nvertices; ++i)
+            newModel->add(vertices[i]);
+        for (int i = 0; i < nedges; ++i)
+            newModel->connect(edges[i].from, edges[i].to, edges[i].weight);
+        return newModel;
     }
 };
 
