@@ -84,16 +84,21 @@ public:
     }
 
     static UGraphModel<T> *create(
-        T *vertices, int nvertices, Edge<T> *edges, int nedges,
+        T *vertices,
+        int nvertices,
+        Edge<T> *edges,
+        int nedges,
         bool (*vertexEQ)(T &, T &),
         string (*vertex2str)(T &))
     {
         // TODO
         auto newModel = new UGraphModel<T>(vertexEQ, vertex2str);
+
         for (int i = 0; i < nvertices; ++i)
             newModel->add(vertices[i]);
         for (int i = 0; i < nedges; ++i)
             newModel->connect(edges[i].from, edges[i].to, edges[i].weight);
+
         return newModel;
     }
 };

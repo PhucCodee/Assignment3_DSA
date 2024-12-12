@@ -33,15 +33,15 @@ public:
 
     void sort(int (*comparator)(T &, T &) = 0)
     {
-        this->tail->prev->next = NULL;
-        this->tail->prev = NULL;
+        this->tail->prev->next = nullptr;
+        this->tail->prev = nullptr;
 
         typename DLinkedList<T>::Node *first = this->head->next;
-        first->prev = NULL;
+        first->prev = nullptr;
         mergeSort(first, comparator);
 
         typename DLinkedList<T>::Node *last = this->head;
-        while (last->next != NULL)
+        while (last->next != nullptr)
             last = last->next;
 
         last->next = this->tail;
@@ -67,68 +67,69 @@ protected:
         }
     }
 
-    void mergeSort(typename DLinkedList<T>::Node *&head, int (*comparator)(T &, T &) = 0)
+    void mergeSort(typename DLinkedList<T>::Node *&head, int (*comparator)(T &, T &) = nullptr)
     {
-        if (head != NULL && head->next != NULL)
+        if (head != nullptr && head->next != nullptr)
         {
             typename DLinkedList<T>::Node *second;
-            devide(head, second);
+            divide(head, second);
             mergeSort(head, comparator);
             mergeSort(second, comparator);
-            merge(head, second, comparator);
+            head = merge(head, second, comparator);
         }
     }
 
-    void devide(typename DLinkedList<T>::Node *&first, typename DLinkedList<T>::Node *&second)
+    void divide(typename DLinkedList<T>::Node *&first, typename DLinkedList<T>::Node *&second)
     {
         typename DLinkedList<T>::Node *midpt = first;
         typename DLinkedList<T>::Node *endpt = first->next;
-        while (endpt->next != NULL && endpt->next->next != NULL)
+        while (endpt != nullptr && endpt->next != nullptr)
         {
             midpt = midpt->next;
             endpt = endpt->next->next;
         }
         second = midpt->next;
-        midpt->next = NULL;
-        second->prev = NULL;
+        midpt->next = nullptr;
+        if (second != nullptr)
+            second->prev = nullptr;
     }
 
-    void merge(typename DLinkedList<T>::Node *&first, typename DLinkedList<T>::Node *&second, int (*comparator)(T &, T &) = 0)
+    typename DLinkedList<T>::Node *merge(typename DLinkedList<T>::Node *first, typename DLinkedList<T>::Node *second, int (*comparator)(T &, T &) = nullptr)
     {
-        typename DLinkedList<T>::Node *result = new typename DLinkedList<T>::Node::Node();
-        typename DLinkedList<T>::Node *ptr = result;
-        while (first != NULL && second != NULL)
+        typename DLinkedList<T>::Node dummy;
+        typename DLinkedList<T>::Node *ptr = &dummy;
+
+        while (first != nullptr && second != nullptr)
         {
-            if (compare(first->data, second->data, comparator) == -1)
+            if (compare(first->data, second->data, comparator) <= 0)
             {
                 ptr->next = first;
-                ptr->next->prev = ptr;
+                first->prev = ptr;
                 first = first->next;
-                ptr = ptr->next;
             }
             else
             {
                 ptr->next = second;
-                ptr->next->prev = ptr;
+                second->prev = ptr;
                 second = second->next;
-                ptr = ptr->next;
             }
+            ptr = ptr->next;
         }
-        if (!first)
+
+        if (first != nullptr)
         {
-            ptr->next = second;
-            ptr->next->prev = ptr;
+            ptr->next = first;
+            first->prev = ptr;
         }
         else
         {
-            ptr->next = first;
-            ptr->next->prev = ptr;
+            ptr->next = second;
+            if (second != nullptr)
+                second->prev = ptr;
         }
 
-        first = result->next;
-        first->prev = NULL;
-        result->next = NULL;
-        delete result;
+        dummy.next->prev = nullptr;
+        return dummy.next;
     }
 };
 

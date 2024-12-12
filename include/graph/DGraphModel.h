@@ -86,7 +86,10 @@ public:
     }
 
     static DGraphModel<T> *create(
-        T *vertices, int nvertices, Edge<T> *edges, int nedges,
+        T *vertices,
+        int nvertices,
+        Edge<T> *edges,
+        int nedges,
         bool (*vertexEQ)(T &, T &),
         string (*vertex2str)(T &))
     {

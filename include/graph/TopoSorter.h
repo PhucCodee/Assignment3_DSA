@@ -43,27 +43,27 @@ public:
 
     DLinkedListSE<T> bfsSort(bool sorted = true)
     {
-        DLinkedListSE<T> topoOrder;
+        DLinkedListSE<T> topologicalOrder;
         xMap<T, int> indegreeMap = vertex2inDegree();
         DLinkedListSE<T> list0Degres = listOfZeroInDegrees();
-        if (sorted && list0Degres.size() != 0)
+        if (sorted && !list0Degres.empty())
             list0Degres.sort();
 
         Queue<T> open;
-        for (auto it = list0Degres.begin(); it != list0Degres.end(); ++it)
-            open.push(*it);
+        for (const auto &vertex : list0Degres)
+            open.push(vertex);
 
         while (!open.empty())
         {
             T vertex = open.pop();
-            topoOrder.add(vertex);
-            DLinkedListSE<T> children = this->graph->getOutwardEdges(vertex);
-            if (sorted && children.size() != 0)
+            topologicalOrder.add(vertex);
+            DLinkedListSE<T> children = graph->getOutwardEdges(vertex);
+            if (sorted && !children.empty())
                 children.sort();
-            for (auto childIt = children.begin(); childIt != children.end(); ++childIt)
+
+            for (const auto &child : children)
             {
-                T child = *childIt;
-                if (open.contains(child) || topoOrder.contains(child))
+                if (open.contains(child) || topologicalOrder.contains(child))
                     continue;
 
                 int new_indeg = indegreeMap.get(child) - 1;
@@ -72,20 +72,20 @@ public:
                     open.push(child);
             }
         }
-        return topoOrder;
+        return topologicalOrder;
     }
 
     DLinkedListSE<T> dfsSort(bool sorted = true)
     {
-        DLinkedListSE<T> topoOrder;
+        DLinkedListSE<T> topologicalOrder;
         xMap<T, int> outdegreeMap = vertex2outDegree();
         DLinkedListSE<T> list0Degres = listOfZeroInDegrees();
-        if (sorted && list0Degres.size() != 0)
+        if (sorted && !list0Degres.empty())
             list0Degres.sort();
 
         Stack<T> open;
-        for (auto it = list0Degres.begin(); it != list0Degres.end(); ++it)
-            open.push(*it);
+        for (const auto &vertex : list0Degres)
+            open.push(vertex);
 
         while (!open.empty())
         {
@@ -94,17 +94,17 @@ public:
             if (outDegree == 0)
             {
                 open.pop();
-                topoOrder.add(0, vertex);
+                topologicalOrder.add(0, vertex);
             }
             else
             {
-                DLinkedListSE<T> children = this->graph->getOutwardEdges(vertex);
-                if (sorted && children.size() != 0)
+                DLinkedListSE<T> children = graph->getOutwardEdges(vertex);
+                if (sorted && !children.empty())
                     children.sort();
-                for (auto childIt = children.begin(); childIt != children.end(); ++childIt)
+
+                for (const auto &child : children)
                 {
-                    T child = *childIt;
-                    if (topoOrder.contains(child))
+                    if (topologicalOrder.contains(child))
                         continue;
 
                     if (open.contains(child))
@@ -114,22 +114,20 @@ public:
                 outdegreeMap.put(vertex, 0);
             }
         }
-        return topoOrder;
+        return topologicalOrder;
     }
 
 protected:
     // Helper functions
+    // TODO
     xMap<T, int> vertex2inDegree()
     {
         xMap<T, int> map(this->hash_code);
-        typename AbstractGraph<T>::Iterator vertexIt = this->graph->begin();
-        while (vertexIt != this->graph->end())
+        for (auto vertexIt = this->graph->begin(); vertexIt != this->graph->end(); ++vertexIt)
         {
             T vertex = *vertexIt;
             int inDegree = this->graph->inDegree(vertex);
             map.put(vertex, inDegree);
-
-            vertexIt++;
         }
         return map;
     }
@@ -137,14 +135,11 @@ protected:
     xMap<T, int> vertex2outDegree()
     {
         xMap<T, int> map(this->hash_code);
-        typename AbstractGraph<T>::Iterator vertexIt = this->graph->begin();
-        while (vertexIt != this->graph->end())
+        for (auto vertexIt = this->graph->begin(); vertexIt != this->graph->end(); ++vertexIt)
         {
             T vertex = *vertexIt;
             int outDegree = this->graph->outDegree(vertex);
             map.put(vertex, outDegree);
-
-            vertexIt++;
         }
         return map;
     }
@@ -152,15 +147,12 @@ protected:
     DLinkedListSE<T> listOfZeroInDegrees()
     {
         DLinkedListSE<T> list;
-        typename AbstractGraph<T>::Iterator vertexIt = this->graph->begin();
-        while (vertexIt != this->graph->end())
+        for (auto vertexIt = this->graph->begin(); vertexIt != this->graph->end(); ++vertexIt)
         {
             T vertex = *vertexIt;
             int inDegree = this->graph->inDegree(vertex);
             if (inDegree == 0)
                 list.add(vertex);
-
-            vertexIt++;
         }
         return list;
     }
